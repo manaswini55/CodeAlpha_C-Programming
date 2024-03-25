@@ -1,91 +1,107 @@
 #include <iostream>
-#include <vector>
-#include <cmath>
-
 using namespace std;
+
 const int N = 9;
-typedef vector<vector<int>> SudokuGrid;
 
-void printGrid(const SudokuGrid &grid) {
-    for (int i = 0; i < N; ++i) {
-        if (i % 3 == 0 && i != 0) {
-            cout << "---------------------\n";
-        }
-        for (int j = 0; j < N; ++j) {
-            if (j % 3 == 0 && j != 0) {
-                cout << "| ";
-            }
-            cout << grid[i][j] << " ";
-        }
-        cout << endl;
-    }
-}
-
-bool isSafe(const SudokuGrid &grid, int row, int col, int num) {
-    for (int i = 0; i < N; ++i) {
-        if (grid[row][i] == num || grid[i][col] == num) {
-            return false;
-        }
-    }
-    int startRow = row - row % 3;
-    int startCol = col - col % 3;
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            if (grid[i + startRow][j + startCol] == num) {
-                return false;
-            }
-        }
-    }
-    
-    return true;
-}
-bool solveSudoku(SudokuGrid &grid) {
-    int row, col;
-    bool isEmpty = false;
-    for (row = 0; row < N; ++row) {
-        for (col = 0; col < N; ++col) {
-            if (grid[row][col] == 0) {
-                isEmpty = true;
-                break;
-            }
-        }
-        if (isEmpty) {
-            break;
-        }
-    }
-    if (!isEmpty) {
-        return true;
-    }
-    for (int num = 1; num <= 9; ++num) {
-        if (isSafe(grid, row, col, num)) {
-            grid[row][col] = num;
-            if (solveSudoku(grid)) {
+bool findEmptyLocation(int board[N][N], int &row, int &col) {
+    for (row = 0; row < N; row++) {
+        for (col = 0; col < N; col++) {
+            if (board[row][col] == 0) {
                 return true;
             }
-            grid[row][col] = 0;
         }
     }
     return false;
 }
 
+bool usedInRow(int board[N][N], int row, int num) {
+    for (int col = 0; col < N; col++) {
+        if (board[row][col] == num) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool usedInColumn(int board[N][N], int col, int num) {
+    for (int row = 0; row < N; row++) {
+        if (board[row][col] == num) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool usedInBox(int board[N][N], int boxStartRow, int boxStartCol, int num) {
+    for (int row = 0; row < 3; row++) {
+        for (int col = 0; col < 3; col++) {
+            if (board[row + boxStartRow][col + boxStartCol] == num) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool isSafe(int board[N][N], int row, int col, int num) {
+    return !usedInRow(board, row, num) &&
+           !usedInColumn(board, col, num) &&
+           !usedInBox(board, row - row % 3, col - col % 3, num);
+}
+
+bool solveSudoku(int board[N][N]) {
+    int row, col;
+    if (!findEmptyLocation(board, row, col)) {
+        return true; // Puzzle solved successfully
+    }
+    for (int num = 1; num <= 9; num++) {
+        if (isSafe(board, row, col, num)) {
+            board[row][col] = num;
+            if (solveSudoku(board)) {
+                return true;
+            }
+            board[row][col] = 0; 
+        }
+    }
+    return false; 
+}
+
+void printBoard(int board[N][N]) {
+    for (int i = 0; i < N; i++) {
+        if (i % 3 == 0 && i != 0) {
+            cout << "- - - - - - - - - - - -" << endl;
+        }
+        for (int j = 0; j < N; j++) {
+            if (j % 3 == 0 && j != 0) {
+                cout << " | ";
+            }
+            if (j == N - 1) {
+                cout << board[i][j] << endl;
+            } else {
+                cout << board[i][j] << " ";
+            }
+        }
+    }
+}
+
 int main() {
-    SudokuGrid grid = {
-        {5, 3, 0, 0, 7, 0, 0, 0, 0},
-        {6, 0, 0, 1, 9, 5, 0, 0, 0},
-        {0, 9, 8, 0, 0, 0, 0, 6, 0},
-        {8, 0, 0, 0, 6, 0, 0, 0, 3},
-        {4, 0, 0, 8, 0, 3, 0, 0, 1},
-        {7, 0, 0, 0, 2, 0, 0, 0, 6},
-        {0, 6, 0, 0, 0, 0, 2, 8, 0},
-        {0, 0, 0, 4, 1, 9, 0, 0, 5},
-        {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    int board[N][N] = {
+        {0, 0, 0, 2, 6, 0, 7, 0, 1},
+        {6, 8, 0, 0, 7, 0, 0, 9, 0},
+        {1, 9, 0, 0, 0, 4, 5, 0, 0},
+        {8, 2, 0, 1, 0, 0, 0, 4, 0},
+        {0, 0, 4, 6, 0, 2, 9, 0, 0},
+        {0, 5, 0, 0, 0, 3, 0, 2, 8},
+        {0, 0, 9, 3, 0, 0, 0, 7, 4},
+        {0, 4, 0, 0, 5, 0, 0, 3, 6},
+        {7, 0, 3, 0, 1, 8, 0, 0, 0}
     };
 
-    if (solveSudoku(grid)) {
-        cout << "Sudoku Puzzle Solved:\n";
-        printGrid(grid);
+    if (solveSudoku(board)) {
+        cout << "Sudoku Puzzle Solved Successfully:" << endl;
+        printBoard(board);
     } else {
-        cout << "No solution exists.\n";
+        cout << "No solution exists for the given Sudoku puzzle." << endl;
     }
 
     return 0;
