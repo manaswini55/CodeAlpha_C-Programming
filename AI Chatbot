@@ -1,0 +1,47 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+string toLower(string str) {
+    transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
+
+string generateResponse(const string& input) {
+    string response;
+    string lowerInput = toLower(input);
+
+    if (lowerInput.find("hello") != string::npos || lowerInput.find("hi") != string::npos) {
+        response = "Hello! How can I assist you?";
+    } else if (lowerInput.find("how are you") != string::npos) {
+        response = "I'm just a computer program, but I'm doing well. Thank you for asking!";
+    } else if (lowerInput.find("bye") != string::npos || lowerInput.find("goodbye") != string::npos) {
+        response = "Goodbye! Have a great day!";
+    } else {
+        response = "I'm sorry, I didn't understand that.";
+    }
+
+    return response;
+}
+
+int main() {
+    cout << "Chatbot: Hello! How can I assist you?\n";
+    string userInput;
+    while (true) {
+        cout << "You: ";
+        getline(cin, userInput);
+
+   
+        if (toLower(userInput).find("bye") != string::npos || toLower(userInput).find("goodbye") != string::npos) {
+            cout << "Chatbot: Goodbye! Have a great day!\n";
+            break;
+        }
+
+        cout << "Chatbot: " << generateResponse(userInput) << endl;
+    }
+
+    return 0;
+}
